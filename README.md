@@ -62,6 +62,18 @@ Knowledge in Slack threads, Google Docs, or engineers' heads is illegible to age
 
 ---
 
+## Using This Repository
+
+Most of the files in this repo (agents, commands, skills) are designed for **Claude Code** and **OpenAI Codex**. However, they can easily be adapted to other harnesses:
+
+- **For other AI tools**: Just prompt your tool to read and adapt the files. The patterns are tool-agnostic.
+- **For a universal sync tool**: We plan to build a sync tool that can push these definitions to any harness.
+- **Internal use**: Clone this repo and ask Claude or Codex to set it up for your project. They will understand the structure and adapt it to your codebase.
+
+The core principles and gates are universal. The implementation details (slash commands, prompt hooks) are just one expression of the Harness Engineering philosophy.
+
+---
+
 ## The Six Gates
 
 A Harness Engineering compliant repository enforces these gates:
