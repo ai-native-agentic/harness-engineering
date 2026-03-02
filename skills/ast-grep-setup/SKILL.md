@@ -15,6 +15,20 @@ Set up ast-grep with common TypeScript rules for detecting anti-patterns, enforc
 - Enforcing architecture boundaries
 - Preventing common TypeScript/JavaScript bugs
 
+## CRITICAL: Read YAML Structure First
+
+**Agents: Before writing any rules, read the [YAML Structure Rules](#critical-yaml-structure-rules) section.**
+
+The most common mistakes are:
+1. Putting `constraints` inside `rule:` (must be at top level)
+2. Duplicate YAML keys like multiple `not:` blocks
+3. Not wrapping multiple conditions in `all:` or `any:`
+
+Use the validation script to catch these before running ast-grep:
+```bash
+python3 scripts/validate-rule.py rules/*.yml
+```
+
 ## Quick Start
 
 ### 1. Initialize ast-grep Configuration
@@ -66,11 +80,11 @@ files:
   - src/**/*.tsx
 rule:
   pattern: function $FUNC($PARAM) { $$$BODY }
-  constraints:
-    PARAM:
-      not:
-        has:
-          kind: type_annotation
+constraints:
+  PARAM:
+    not:
+      has:
+        kind: type_annotation
 ```
 
 #### no-unsafe-any-usage
@@ -84,9 +98,9 @@ severity: error
 message: "Unsafe property access on 'any' type. Cast or add type guard."
 rule:
   pattern: $EXPR.$PROP
-  constraints:
-    EXPR:
-      typeAnnotation: any
+constraints:
+  EXPR:
+    typeAnnotation: any
 ```
 
 ### Async/Await Rules
@@ -125,9 +139,9 @@ rule:
           kind: call_expression
           pattern: $$$.catch($$$)
           stopBy: end
-  constraints:
-    PROMISE_FUNC:
-      regex: (fetch|axios\.[a-z]+|async|\.then)
+constraints:
+  PROMISE_FUNC:
+    regex: (fetch|axios\.[a-z]+|async|\.then)
 ```
 
 #### no-missing-await
@@ -153,9 +167,9 @@ rule:
         inside:
           kind: return_statement
           stopBy: end
-  constraints:
-    FUNC:
-      typeAnnotation: /^Promise</
+constraints:
+  FUNC:
+    typeAnnotation: /^Promise</
 ```
 
 ### Error Handling Rules
@@ -230,13 +244,13 @@ files:
   - src/**/*.tsx
 rule:
   pattern: useEffect($FUNC, [])
-  constraints:
-    FUNC:
-      has:
-        kind: identifier
-        pattern: $ID
-        not:
-          pattern: console
+constraints:
+  FUNC:
+    has:
+      kind: identifier
+      pattern: $ID
+      not:
+        pattern: console
 ```
 
 #### no-direct-state-mutation
@@ -503,3 +517,259 @@ VS Code: Install the "ast-grep" extension for inline highlighting.
 | `await $EXPR` | Await expressions |
 | `try { $$$TRY } catch ($ERR) { $$$CATCH }` | Try-catch |
 | `$ARR.map($FN)` | Array methods |
+
+---
+
+## Critical: YAML Structure Rules
+
+**STOP: Read this before writing rules.** These are the most common mistakes agents make.
+
+### 1. `constraints` Goes at TOP LEVEL
+
+**WRONG - constraints inside rule:**
+```yaml
+id: bad-example
+rule:
+  pattern: import $NAME from $MOD
+  constraints:           # ❌ WRONG: constraints inside rule
+    MOD:
+      regex: "fs"
+```
+
+**RIGHT - constraints at top level:**
+```yaml
+id: good-example
+rule:
+  pattern: import $NAME from $MOD
+constraints:             # ✓ CORRECT: constraints at root level
+  MOD:
+    regex: "fs"
+```
+
+### 2. No Duplicate Keys in YAML
+
+**WRONG - duplicate `not:` keys:**
+```yaml
+rule:
+  all:
+    - pattern: $FUNC($$$ARGS)
+    - not:                 # ❌ First not
+        inside:
+          kind: await_expression
+    - not:                 # ❌ DUPLICATE KEY - YAML will only keep one!
+        inside:
+          kind: return_statement
+```
+
+**RIGHT - wrap in `all:` with separate patterns:**
+```yaml
+rule:
+  all:
+    - pattern: $FUNC($$$ARGS)
+    - not:
+        inside:
+          kind: await_expression
+          stopBy: end
+    - not:
+        inside:
+          kind: return_statement
+          stopBy: end
+```
+
+Or use `any:` for alternatives:
+```yaml
+rule:
+  any:
+    - pattern: fetch($$$)
+    - pattern: axios.$METHOD($$$)
+```
+
+### 3. Proper `all:` / `any:` Structure
+
+**Pattern:** When you need multiple conditions or multiple negations, always wrap in `all:` or `any:`.
+
+```yaml
+# Multiple conditions all must match
+rule:
+  all:
+    - pattern: $FUNC($$$ARGS)
+    - has:
+        kind: call_expression
+    - not:
+        inside:
+          kind: await_expression
+
+# Any of these patterns match
+rule:
+  any:
+    - pattern: console.log($$$)
+    - pattern: console.warn($$$)
+    - pattern: console.error($$$)
+```
+
+### 4. Top-Level Rule File Structure
+
+```yaml
+id: rule-id                          # Required: unique identifier
+language: TypeScript                  # Required: target language
+severity: error                       # Required: error, warning, hint, info
+message: "Error message"              # Required: user-facing message
+files:                              # Optional: glob patterns
+  - src/**/*.ts
+ignores:                            # Optional: exclusion patterns
+  - "**/*.test.ts"
+rule:                               # Required: the matching rule
+  pattern: ...                       # Basic pattern
+  # OR
+  all: []                           # Multiple conditions
+  # OR
+  any: []                           # Alternative patterns
+constraints:                        # Optional: variable constraints (TOP LEVEL!)
+  VAR_NAME:
+    regex: "pattern"
+utils:                              # Optional: utility patterns
+  MY_UTIL:
+    pattern: ...
+```
+
+### 5. Validate Before Running
+
+Always validate your YAML structure before testing:
+
+```bash
+# Check YAML is valid
+python3 -c "import yaml; yaml.safe_load(open('rules/my-rule.yml'))" && echo "YAML OK"
+
+# Check rule structure
+python3 scripts/validate-rule.py rules/my-rule.yml
+
+# Then run ast-grep
+cd rules/ast-grep && ast-grep scan
+```
+
+### 6. Common Error Messages
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `missing field constraints` | constraints inside rule | Move to top level |
+| `yaml.scanner.ScannerError` | Duplicate keys | Use `all:` wrapper |
+| `unknown variant` | Invalid enum value | Check docs for valid values |
+| `did not find expected key` | Indentation error | Check YAML indentation |
+
+## Rule Validation Script
+
+Use this script to validate rule files before committing:
+
+```python
+#!/usr/bin/env python3
+"""Validate ast-grep rule YAML structure."""
+import yaml
+import sys
+from pathlib import Path
+
+def validate_rule(file_path):
+    """Validate a single rule file."""
+    content = Path(file_path).read_text()
+    data = yaml.safe_load(content)
+    errors = []
+
+    # Check required fields
+    required = ['id', 'language', 'severity', 'message', 'rule']
+    for field in required:
+        if field not in data:
+            errors.append(f"Missing required field: {field}")
+
+    # Check constraints at wrong level (common mistake)
+    if 'rule' in data and isinstance(data['rule'], dict):
+        if 'constraints' in data['rule']:
+            errors.append("constraints inside rule: - must be at TOP LEVEL")
+        if 'utils' in data['rule']:
+            errors.append("utils inside rule: - must be at TOP LEVEL")
+        if 'transform' in data['rule']:
+            errors.append("transform inside rule: - must be at TOP LEVEL")
+
+    # Check for duplicate keys by analyzing raw YAML
+    lines = content.split('\n')
+    for i, line in enumerate(lines, 1):
+        stripped = line.lstrip()
+        if stripped.startswith('- '):
+            continue  # Skip list items
+        if ':' in stripped:
+            key = stripped.split(':')[0]
+            # This is a simple check - proper parsing would be more robust
+
+    if errors:
+        print(f"❌ {file_path}")
+        for err in errors:
+            print(f"   - {err}")
+        return False
+    else:
+        print(f"✓ {file_path}")
+        return True
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: validate-rule.py <rule-file.yml> [rule-file2.yml ...]")
+        sys.exit(1)
+
+    all_valid = True
+    for path in sys.argv[1:]:
+        if not validate_rule(path):
+            all_valid = False
+
+    sys.exit(0 if all_valid else 1)
+```
+
+Save as `scripts/validate-rule.py` and run:
+```bash
+python3 scripts/validate-rule.py rules/*.yml
+```
+
+### Pre-commit Hook
+
+Add this to `.git/hooks/pre-commit` or `.pre-commit-config.yaml`:
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit - validate ast-grep rules
+
+RULES_DIR="rules/ast-grep/rules"
+if [ -d "$RULES_DIR" ]; then
+    echo "Validating ast-grep rules..."
+    if ! python3 scripts/validate-rule.py "$RULES_DIR"/*.yml; then
+        echo ""
+        echo "❌ Rule validation failed. Fix YAML structure errors before committing."
+        echo "   See skills/ast-grep-setup/SKILL.md for YAML structure rules."
+        exit 1
+    fi
+fi
+exit 0
+```
+
+Make it executable:
+```bash
+chmod +x .git/hooks/pre-commit
+```
+
+### GitHub Actions Validation
+
+Add this job to validate rules in CI:
+
+```yaml
+# .github/workflows/validate-ast-grep-rules.yml
+name: Validate ast-grep Rules
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pyyaml
+        run: pip install pyyaml
+      - name: Validate rule files
+        run: python3 scripts/validate-rule.py rules/ast-grep/rules/*.yml
+```

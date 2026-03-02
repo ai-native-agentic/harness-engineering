@@ -27,6 +27,6 @@ rule:
           kind: call_expression
           pattern: $$$.catch($$$)
           stopBy: end
-  constraints:
-    PROMISE_FUNC:
-      regex: (fetch|axios\.[a-z]+|async|\.then)
+constraints:
+  PROMISE_FUNC:
+    regex: (fetch|axios\.[a-z]+|async|\.then)
