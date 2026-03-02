@@ -130,4 +130,4 @@ See `docs/harness-engineering.md` for the full specification.
 
 ## License
 
-[Specify your license]
+MIT License — see [LICENSE](LICENSE) file for details.
