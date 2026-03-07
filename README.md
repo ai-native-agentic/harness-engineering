@@ -55,9 +55,11 @@ Knowledge in Slack threads, Google Docs, or engineers' heads is illegible to age
 ├── skills/                       # Reusable skill definitions
 │   ├── ast-grep-setup/           # TypeScript ast-grep rules setup
 │   ├── codebase-research/        # Codebase mapping and research
-│   ├── execute-from-plan/        # Execution from research docs
-│   ├── planning-from-research/   # Plan generation
-│   └── qa-from-execution/        # QA review after execution
+│   ├── differential-session-runner/ # Durable debugging/evidence sessions
+│   ├── harness-map/              # Repository harness layer mapping
+│   ├── implementation-planner/   # Plan generation from research
+│   ├── plan-executor/            # Execute implementation plans
+│   └── qa-from-execute/          # QA review after execution
 ├── prompt-hooks/                 # Prompt hooks for automation
 ├── alias/                        # Model alias configurations
 └── rules/                        # Structural and taste rules
@@ -80,6 +82,8 @@ claude --plugin-dir /path/to/harness-engineering
 
 Once installed, skills are available as `/harness-engineering:<skill-name>`:
 - `/harness-engineering:codebase-research` - Map and research codebases
+- `/harness-engineering:harness-map` - Map a repo's mechanical harness layers
+- `/harness-engineering:differential-session-runner` - Create or continue durable debugging/evidence sessions
 - `/harness-engineering:implementation-planner` - Generate execution plans
 - `/harness-engineering:plan-executor` - Execute implementation plans
 - `/harness-engineering:qa-from-execute` - QA review of changes
