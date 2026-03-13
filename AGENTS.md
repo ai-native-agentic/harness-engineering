@@ -12,34 +12,43 @@ Stack: Shell scripts, YAML configs, Markdown docs
 
 ## STRUCTURE
 
-```
-.
-├── docs/                        # Specifications
-│   ├── harness-engineering.md   # Full HES v1 specification
-│   └── workflows/RPEQ.md        # Research → Plan → Execute → QA
-├── agents/                      # Agent role definitions
-│   ├── analysis/                # Codebase analysis agents
-│   ├── development/             # TDD, refactoring agents
-│   ├── documentation/           # Docs generation agents
-│   ├── research/                # Research + synthesis
-│   ├── performance/             # Profiling, optimization
-│   └── security/                # Security review
-├── commands/                    # Claude Code slash commands
-│   ├── context-engineering/     # Research, plan, execute workflow
-│   ├── integration/             # External tool integrations
-│   ├── quality-assurance/       # QA + inspection
-│   └── utilities/               # Helpers
-├── skills/                      # Reusable skill definitions
-│   ├── ast-grep-setup/          # TypeScript ast-grep rules
-│   ├── codebase-research/       # Codebase mapping
-│   ├── execute-from-plan/       # Plan execution
-│   ├── planning-from-research/  # Plan generation
-│   └── qa-from-execution/       # Post-exec QA
-├── prompt-hooks/                # Automation hooks
-├── alias/                       # Model alias configs
-├── rules/                       # Linting/enforcement rules
-└── status-line/                 # Status display utilities
-```
+harness-engineering/
+├── agents/
+│   ├── analysis/
+│   ├── development/
+│   ├── documentation/
+│   ├── performance/
+│   ├── research/
+│   ├── security/
+│   └── README.md
+├── alias/
+│   └── README.md
+├── commands/
+│   ├── context engineering/
+│   ├── integration/
+│   ├── quality-assurance/
+│   ├── utilities/
+│   ├── README.md
+├── docs/
+│   ├── workflows/
+├── prompt-hooks/
+│   ├── commands/
+│   ├── examples/
+│   ├── skills/
+│   ├── subagents/
+│   └── README.md
+├── rules/
+│   └── ast-grep/
+├── skills/
+│   ├── ast-grep-setup/
+│   ├── codebase-research/
+│   ├── execute-from-plan/
+│   ├── planning-from-research/
+│   └── qa-from-execution/
+├── status-line/
+├── tests/
+├── AGENTS.md
+├── README.md
 
 ## WHERE TO LOOK
 
