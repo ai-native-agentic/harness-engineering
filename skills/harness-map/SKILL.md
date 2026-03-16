@@ -1,6 +1,6 @@
 ---
 name: harness-map
-description: Map a repository's mechanical harness layers: canonical check command, local and CI gates, architecture boundaries, structural rules, behavioral verification, docs ratchets, evidence workflows, and operator-facing surfaces. Use when you need to understand how a repo keeps change safe.
+description: "Map a repository's mechanical harness layers: canonical check command, local and CI gates, architecture boundaries, structural rules, behavioral verification, docs ratchets, evidence workflows, and operator-facing surfaces. Use when you need to understand how a repo keeps change safe."
 writes-to: memory-bank/research/
 allowed-tools:
   - Read
