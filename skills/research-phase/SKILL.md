@@ -1,7 +1,7 @@
 ---
-name: codebase-research
-description: This skill should be used when mapping or researching a codebase to understand its structure, patterns, and architecture. Use when the user asks to "map the codebase", "research how X works", "find all Y patterns", or needs to understand code organization. Produces factual structural maps in memory-bank/research/—no suggestions, no recommendations, just what exists. Uses ast-grep for structural pattern matching.
-writes-to: memory-bank/research/
+name: research-phase
+description: This skill should be used when mapping or researching a codebase to understand its structure, patterns, and architecture. Use when the user asks to "map the codebase", "research how X works", "find all Y patterns", or needs to understand code organization. Produces factual structural maps in .artifacts/research/—no suggestions, no recommendations, just what exists. Uses ast-grep for structural pattern matching.
+writes-to: .artifacts/research/
 allowed-tools:
   - Bash
   - Read
@@ -12,12 +12,12 @@ allowed-tools:
   - Agent
 hard-guards:
   - Facts only - no recommendations or implementation advice
-  - Store research output in memory-bank/research/
+  - Store research output in .artifacts/research/
   - Include exact file paths and line numbers where applicable
   - Do not modify source code while researching
 ---
 
-# Codebase Research
+# Research Phase
 
 Map and document codebase structure using structural analysis. This skill produces **factual maps only**—no suggestions, no recommendations, no opinions. Document what exists, where it lives, and how it connects.
 
@@ -139,14 +139,17 @@ Wait for ALL research tasks to complete, then compile findings:
 
 ### Step 4: Document Findings
 
-Create `memory-bank/research/YYYY-MM-DD_HH-MM-SS_<topic>.md` using format:
+Create `.artifacts/research/YYYY-MM-DD_HH-MM-SS_<topic>.md` using format:
    ```markdown
    ---
-   title: "<topic> – Research"
-   phase: Research
-   date: "YYYY-MM-DD HH:MM:SS"
-   owner: "<agent_or_user>"
+   title: "<topic> research findings"
+   link: "<topic>-research"
+   type: research
+   ontological_relations:
+     - relates_to: [[<related-doc>]]
    tags: [research, <topic>]
+   uuid: "<uuid>"
+   created_at: "<ISO-8601 timestamp>"
    ---
 
    ## Structure
@@ -187,10 +190,4 @@ All research output must:
 
 ## Handoff
 
-After writing the research document to `memory-bank/research/`, hand off to `implementation-planner` if the next step is the Plan phase.
-
-Suggested next command:
-
-```text
-/use implementation-planner "memory-bank/research/<file>.md"
-```
+After writing the research document to `.artifacts/research/`, proceed to `plan-phase` if the next step is the Plan phase.

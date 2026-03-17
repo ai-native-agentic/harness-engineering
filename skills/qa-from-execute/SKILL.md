@@ -1,6 +1,6 @@
 ---
 name: qa-from-execute
-description: Perform quality assurance on code changes after the implementation-planner -> plan-executor workflow. STRICTLY QA only—no coding, no fixes, no source-code changes. Focus on changed areas only, emphasizing control/data flow correctness.
+description: Perform quality assurance on code changes after the research-phase -> plan-phase -> execute-phase workflow. STRICTLY QA only—no coding, no fixes, no source-code changes. Focus on changed areas only, emphasizing control/data flow correctness.
 writes-to: memory-bank/qa/
 allowed-tools:
   - Read

@@ -1,7 +1,7 @@
 ---
-name: implementation-planner
+name: plan-phase
 description: Generate execution-ready implementation plans from research docs - planning ONLY, no fixing or verifying. North Star is whether a JR developer can execute the plan with zero additional context.
-writes-to: memory-bank/plan/
+writes-to: .artifacts/plan/
 allowed-tools:
   - Read
   - Edit
@@ -20,7 +20,7 @@ hard-guards:
   - Every task must be unambiguous to a JR developer
 ---
 
-# Implementation Planner
+# Plan Phase
 
 ## Overview
 
@@ -35,7 +35,7 @@ Generate execution-ready, coding-only implementation plans from research documen
 ## When to Use
 
 - User asks to "create a plan from research"
-- User references a research doc in `memory-bank/research/`
+- User references a research doc in `.artifacts/research/`
 - User wants "implementation steps" from findings
 - User asks to "break down into tasks" a researched topic
 
@@ -54,7 +54,7 @@ Generate execution-ready, coding-only implementation plans from research documen
 ### 1. Read Research Doc
 
 ```
-Read from: memory-bank/research/<topic>.md
+Read from: .artifacts/research/<topic>.md
 Extract: scope, constraints, target files, unresolved questions, proposed solutions
 ```
 
@@ -68,19 +68,22 @@ git status --short          # Working tree status
 
 ### 3. Generate Plan File
 
-Save as: `memory-bank/plan/YYYY-MM-DD_HH-MM-SS_<topic>.md`
+Save as: `.artifacts/plan/YYYY-MM-DD_HH-MM-SS_<topic>.md`
 
 ### 4. Plan Structure
 
 ```markdown
 ---
-title: "<topic> – Implementation Plan"
-phase: Plan
-date: "{{timestamp}}"
-owner: "{{agent_or_user}}"
-parent_research: "memory-bank/research/<file>.md"
-git_commit_at_plan: "<short_sha>"
+title: "<topic> implementation plan"
+link: "<topic>-plan"
+type: implementation_plan
+ontological_relations:
+  - relates_to: [[<research-link>]]
 tags: [plan, <topic>, coding]
+uuid: "<uuid>"
+created_at: "<ISO-8601 timestamp>"
+parent_research: ".artifacts/research/<file>.md"
+git_commit_at_plan: "<short_sha>"
 ---
 
 ## Goal
@@ -144,7 +147,7 @@ Focus on proving correctness, not coverage.
 ## Final Gate
 
 - **Output summary**: plan path, milestone count, tasks ready
-- **Next command**: `/use plan-executor "<plan_path>"`
+- **Next step**: proceed to execute-phase with the generated plan path
 ```
 
 ## Task Writing Guidelines
@@ -213,12 +216,12 @@ Before finalizing, ask:
 After plan generation, output:
 
 ```
-✓ Plan written to: memory-bank/plan/YYYY-MM-DD_HH-MM-SS_<topic>.md
+✓ Plan written to: .artifacts/plan/YYYY-MM-DD_HH-MM-SS_<topic>.md
 ✓ Milestones: 4
 ✓ Tasks: 12
 ✓ Git state: <short_sha>
 
-Next: /use plan-executor "memory-bank/plan/YYYY-MM-DD_HH-MM-SS_<topic>.md"
+Next step: Execute phase using the generated plan path
 ```
 
 ## Examples
@@ -267,10 +270,4 @@ Default: Don't use subagents. Trust the research doc.
 
 ## Handoff
 
-After writing the plan document to `memory-bank/plan/`, hand off to `plan-executor` if the next step is the Execute phase.
-
-Suggested next command:
-
-```text
-/use plan-executor "memory-bank/plan/<file>.md"
-```
+After writing the plan document to `.artifacts/plan/`, proceed to `execute-phase` if the next step is the Execute phase.

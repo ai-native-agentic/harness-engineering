@@ -242,6 +242,6 @@ It must include:
 
 After updating the session artifact:
 
-- if the investigation uncovered code work, hand off to `implementation-planner`
-- if code work is already scoped in a plan, hand off to `plan-executor`
+- if the investigation uncovered code work, hand off to `plan-phase`
+- if code work is already scoped in a plan, hand off to `execute-phase`
 - if the investigation is complete, send the user the session path and a one-line status
