@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Agent definitions for analysis, development, documentation, research, performance, and security
 - Slash commands for context engineering, integration, QA, and utilities
 - Skill definitions for codebase research, planning, execution, and QA
+- **agents-md-mapper skill** (`skills/agents-md-mapper/`) - creates or refreshes repository `AGENTS.md` files as concise maps grounded in current structure, commands, CI, docs, and recent change signals
+- **harness-map skill** (`skills/harness-map/`) - maps a repository's mechanical harness layers, canonical check command, CI gates, policy layers, docs ratchets, evidence workflows, and operator surfaces
+- **differential-session-runner skill** (`skills/differential-session-runner/`) - creates or continues durable differential debugging sessions with artifact identity, exact commands, mismatch progression, findings, validation, and next probe
 - **ast-grep-setup skill** (`skills/ast-grep-setup/`) - TypeScript rules for common pain points
   - Rules: no-empty-catch, no-floating-promises, no-console-log, no-debugger, no-node-in-frontend
   - Templates for sgconfig.yml and rule tests
