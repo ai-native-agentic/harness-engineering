@@ -1,7 +1,7 @@
 ---
-name: plan-executor
-description: Execute implementation plans from memory-bank/plan/. Focus on EXECUTING ONLY - no planning, no fixes outside plan scope. Uses gated checks, atomic commits, and maintains a single execution log in memory-bank/execute/. Use when the user says "execute this plan" or provides a plan path.
-writes-to: memory-bank/execute/
+name: execute-phase
+description: Execute implementation plans from .artifacts/plan/. Focus on EXECUTING ONLY - no planning, no fixes outside plan scope. Uses gated checks, atomic commits, and maintains a single execution log in .artifacts/execute/. Use when the user says "execute this plan" or provides a plan path.
+writes-to: .artifacts/execute/
 allowed-tools:
   - Edit
   - Read
@@ -26,11 +26,11 @@ hard-guards:
   - Commit atomic changes per task
 ---
 
-# Plan Executor
+# Execute Phase
 
 ## Overview
 
-Execute implementation plans from `memory-bank/plan/` with strict discipline: gated checks, atomic commits, and a single living execution log.
+Execute implementation plans from `.artifacts/plan/` with strict discipline: gated checks, atomic commits, and a single living execution log.
 
 ## North Star Rule
 
@@ -40,7 +40,7 @@ Execute implementation plans from `memory-bank/plan/` with strict discipline: ga
 
 ## When to Use
 
-- User provides a plan path: `/use plan-executor "memory-bank/plan/<file>.md"`
+- User provides a plan path in `.artifacts/plan/`
 - User says "execute this plan" or "run the plan"
 - User references a plan document for implementation
 
@@ -57,7 +57,7 @@ Execute implementation plans from `memory-bank/plan/` with strict discipline: ga
 
 ### 0. Input
 
-User provides: `$ARGUMENTS` = path to plan in `memory-bank/plan/`
+User provides: `$ARGUMENTS` = path to plan in `.artifacts/plan/`
 
 ### 1. Read Plan & Lock Context
 
@@ -86,15 +86,20 @@ git add -A
 git commit -m "rollback: before executing plan <topic>"
 ```
 
-Create `memory-bank/execute/YYYY-MM-DD_HH-MM-SS_<topic>.md`:
+Create `.artifacts/execute/YYYY-MM-DD_HH-MM-SS_<topic>.md`:
 
 ```markdown
 ---
-title: "<topic> – Execution Log"
-phase: Execute
-date: "{{timestamp}}"
+title: "<topic> execution log"
+link: "<topic>-execute"
+type: debug_history
+ontological_relations:
+  - relates_to: [[<plan-link>]]
+tags: [execute, <topic>]
+uuid: "<uuid>"
+created_at: "<ISO-8601 timestamp>"
 owner: "{{user}}"
-plan_path: "memory-bank/plan/<file>.md"
+plan_path: ".artifacts/plan/<file>.md"
 start_commit: "<short_sha>"
 env: {target: "local|staging|prod", notes: ""}
 ---
@@ -198,10 +203,15 @@ Persist artifact pointers in the execution log.
 
 ```markdown
 ---
-title: "<topic> – Execution Log"
-phase: Execute
-date: "{{timestamp}}"
-plan_path: "memory-bank/plan/<file>.md"
+title: "<topic> execution log"
+link: "<topic>-execute"
+type: debug_history
+ontological_relations:
+  - relates_to: [[<plan-link>]]
+tags: [execute, <topic>]
+uuid: "<uuid>"
+created_at: "<ISO-8601 timestamp>"
+plan_path: ".artifacts/plan/<file>.md"
 start_commit: "<sha>"
 end_commit: "<sha>"
 env: {target: "...", notes: "..."}
@@ -312,7 +322,7 @@ Before proceeding with each task:
 Start:
 
 ```
-Executing plan: memory-bank/plan/<file>.md
+Executing plan: .artifacts/plan/<file>.md
 Branch: <branch>
 Rollback point: <commit_sha>
 Tasks: N
@@ -324,16 +334,10 @@ End:
 ```
 Execution complete: Success | Failure | Blocked
 Tasks completed: N/N
-Log: memory-bank/execute/<file>.md
-Next: /use qa-from-execute "memory-bank/execute/<file>.md"
+Log: .artifacts/execute/<file>.md
+Next step: QA from execute using the generated execution log path
 ```
 
 ## Handoff
 
-After writing the execution log to `memory-bank/execute/`, hand off to `qa-from-execute` if the next step is the QA phase.
-
-Suggested next command:
-
-```text
-/use qa-from-execute "memory-bank/execute/<file>.md"
-```
+After writing the execution log to `.artifacts/execute/`, proceed to `qa-from-execute` if the next step is the QA phase.

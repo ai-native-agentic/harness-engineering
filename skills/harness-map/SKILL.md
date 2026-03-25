@@ -276,4 +276,4 @@ Common next steps after this skill:
 
 - generate a condensed harness summary for operators
 - compare two repos' harnesses
-- use `implementation-planner` if the user wants to add or improve a harness layer
+- use `plan-phase` if the user wants to add or improve a harness layer
